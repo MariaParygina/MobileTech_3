@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -89,97 +90,99 @@ fun TvShowDetailsScreen(
             is TvShowDetailsState.Success -> {
                 val show = (state as TvShowDetailsState.Success).show
 
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(innerPadding)
                         .padding(horizontal = 16.dp)
                 ) {
-                    Button(
-                        onClick = onBackClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFE1E0E7),
-                            contentColor = Color.Black
-                        ),
-                        border = BorderStroke(1.dp, cardBorder),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Back")
-                    }
-
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (show.image?.medium != null) {
-                            AsyncImage(
-                                model = show.image.medium,
-                                contentDescription = show.name,
-                                modifier = Modifier
-                                    .size(width = 120.dp, height = 180.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                            )
+                    item {
+                        Button(
+                            onClick = onBackClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFE1E0E7),
+                                contentColor = Color.Black
+                            ),
+                            border = BorderStroke(1.dp, cardBorder),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Back")
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(5.dp))
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (show.image?.medium != null) {
+                                AsyncImage(
+                                    model = show.image.medium,
+                                    contentDescription = show.name,
+                                    modifier = Modifier
+                                        .size(width = 120.dp, height = 180.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                            }
+                        }
 
-                    if (!show.network?.country?.name.isNullOrEmpty()) {
-                        LabeledText("Country", show.network?.country?.name ?: "")
-                    } else {
-                        LabeledText("Country", "Not specified")
-                    }
+                        Spacer(modifier = Modifier.height(5.dp))
 
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    if (!show.network?.holder.isNullOrEmpty()) {
-                        LabeledText("TV company", show.network?.holder ?: "")
-                    } else {
-                        LabeledText("TV company", "Not specified")
-                    }
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    if (!show.officialSite.isNullOrEmpty()) {
-                        LabeledText("Website", show.officialSite ?: "")
-                    } else {
-                        LabeledText("Website", "Not specified")
-                    }
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    LabeledText("Status", show.status)
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    LabeledText("Premiered", show.premiered)
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    if (!show.ended.isNullOrEmpty()) {
-                        LabeledText("Ended", show.ended)
-                    } else {
-                        LabeledText("Ended", "Still running")
-                    }
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Text(
-                        text = "Description:",
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    val cleanSummary = remember(show.summary) {
-                        if (!show.summary.isNullOrEmpty()) {
-                            Html.fromHtml(show.summary, Html.FROM_HTML_MODE_COMPACT).toString()
+                        if (!show.network?.country?.name.isNullOrEmpty()) {
+                            LabeledText("Country", show.network?.country?.name ?: "")
                         } else {
-                            "No summary available"
+                            LabeledText("Country", "Not specified")
                         }
-                    }
 
-                    Text(text = cleanSummary)
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        if (!show.network?.holder.isNullOrEmpty()) {
+                            LabeledText("TV company", show.network?.holder ?: "")
+                        } else {
+                            LabeledText("TV company", "Not specified")
+                        }
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        if (!show.officialSite.isNullOrEmpty()) {
+                            LabeledText("Website", show.officialSite ?: "")
+                        } else {
+                            LabeledText("Website", "Not specified")
+                        }
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        LabeledText("Status", show.status)
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        LabeledText("Premiered", show.premiered)
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        if (!show.ended.isNullOrEmpty()) {
+                            LabeledText("Ended", show.ended)
+                        } else {
+                            LabeledText("Ended", "Still running")
+                        }
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        Text(
+                            text = "Description:",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        val cleanSummary = remember(show.summary) {
+                            if (!show.summary.isNullOrEmpty()) {
+                                Html.fromHtml(show.summary, Html.FROM_HTML_MODE_COMPACT).toString()
+                            } else {
+                                "No summary available"
+                            }
+                        }
+
+                        Text(text = cleanSummary)
+                    }
                 }
             }
 
