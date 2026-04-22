@@ -42,6 +42,10 @@ fun TvShowListScreen(
             TvShowListLoading()
         }
 
+        is TvShowListState.Empty -> {
+            TvShowListEmpty()
+        }
+
         is TvShowListState.Success -> {
             Scaffold(
                 topBar = {

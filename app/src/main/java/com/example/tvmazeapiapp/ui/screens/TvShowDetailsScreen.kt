@@ -150,11 +150,11 @@ fun TvShowDetailsScreen(
 
                         Spacer(modifier = Modifier.height(5.dp))
 
-                        LabeledText("Status", show.status)
+                        LabeledText("Status", show.status ?: "Not specified")
 
                         Spacer(modifier = Modifier.height(5.dp))
 
-                        LabeledText("Premiered", show.premiered)
+                        LabeledText("Premiered", show.premiered ?: "Not specified")
 
                         Spacer(modifier = Modifier.height(5.dp))
 

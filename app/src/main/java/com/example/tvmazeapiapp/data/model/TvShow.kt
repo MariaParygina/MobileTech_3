@@ -9,11 +9,11 @@ data class TvShow(
     val genres: List<String>?,
     val rating: Rating?,
 
-    val status: String,
-    val premiered: String,
-    val ended: String,
-    val officialSite: String,
-    val summary: String,
+    val status: String?,
+    val premiered: String?,
+    val ended: String?,
+    val officialSite: String?,
+    val summary: String?,
     val image: Image?
 )
 

@@ -12,7 +12,7 @@ data class TvMazeUiState(
 
 sealed class TvShowListState {
     object Loading : TvShowListState()
+    object Empty : TvShowListState()
     data class Success(val shows: List<TvShow>) : TvShowListState()
     data class Error(val message: String) : TvShowListState()
 }
-

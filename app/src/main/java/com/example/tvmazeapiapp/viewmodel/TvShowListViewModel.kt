@@ -28,6 +28,7 @@ class TvShowListViewModel(
     private var allShows = mutableListOf<TvShow>()
     private var currentQuery: String? = null
     private var isLoadingMore = false
+    private var isSearching = false
 
     fun onEvent(event: TvShowListEvent) {
         when (event) {
@@ -60,42 +61,50 @@ class TvShowListViewModel(
         }
     }
 
-    private fun loadMore() {
-        if (isLoadingMore) return
-
-        isLoadingMore = true
-
+    fun loadMore() {
         viewModelScope.launch {
-            val result = repository.getShows(page = currentPage)
+            val result = if (isSearching && currentQuery != null) {
+                repository.searchShows(currentQuery!!)
+            } else {
+                repository.getShows(page = currentPage)
+            }
+
             if (result.isSuccess) {
-                val newShows = result.getOrNull() ?: emptyList()
-                val next25 = newShows.take(25)  // Берем следующие 25
-                allShows.addAll(next25)
-                currentPage++
+                val newShows = result.getOrNull().orEmpty()
+
+                if (!isSearching) {
+                    val next25 = newShows.take(25)
+                    allShows.addAll(next25)
+                    currentPage++
+                } else {
+                    allShows.addAll(newShows)
+                }
+
                 _state.value = TvShowListState.Success(allShows.toList())
             } else {
-                _state.value = TvShowListState.Success(allShows.toList())
+                _state.value = TvShowListState.Error("Load more failed")
             }
-            isLoadingMore = false
         }
     }
 
-    private fun searchShows(query: String) {
-        if (query.isBlank()) {
-            loadShows()
-            return
-        }
-
+    fun searchShows(query: String) {
         viewModelScope.launch {
-            _state.value = TvShowListState.Loading
+            isSearching = true
             currentQuery = query
+            currentPage = 0
+            allShows.clear()
 
             val result = repository.searchShows(query)
+
             if (result.isSuccess) {
-                val shows = result.getOrNull() ?: emptyList()
-                _state.value = TvShowListState.Success(shows)
+                val shows = result.getOrNull().orEmpty()
+                _state.value = if (shows.isEmpty()) {
+                    TvShowListState.Empty
+                } else {
+                    TvShowListState.Success(shows)
+                }
             } else {
-                _state.value = TvShowListState.Error(result.exceptionOrNull()?.message ?: "Неизвестная ошибка")
+                _state.value = TvShowListState.Error("Search failed")
             }
         }
     }
