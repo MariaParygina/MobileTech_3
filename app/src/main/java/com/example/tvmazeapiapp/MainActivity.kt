@@ -31,6 +31,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.tvmazeapiapp.di.ShowRoutes
 import com.example.tvmazeapiapp.ui.screens.TvShowDetailsScreen
+import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModel
+import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,16 +57,16 @@ fun TvShowApp(modifier: Modifier = Modifier) {
     val api = NetworkModule.api.create(TvMazeApi::class.java)
     val repository = TvShowRepository(api)
 
-    val viewModel: TvShowListViewModel = viewModel(
+    val listViewModel: TvShowListViewModel = viewModel(
         factory = TvShowListViewModelFactory(repository)
     )
 
-    val state by viewModel.state.collectAsState()
+    val state by listViewModel.state.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        viewModel.onEvent(TvShowListEvent.LoadShows)
+        listViewModel.onEvent(TvShowListEvent.LoadShows)
     }
 
     NavHost(
@@ -76,7 +78,7 @@ fun TvShowApp(modifier: Modifier = Modifier) {
                 state = state,
                 searchQuery = searchQuery,
                 onSearchQueryChange = { searchQuery = it },
-                onEvent = viewModel::onEvent,
+                onEvent = listViewModel::onEvent,
                 onShowClick = { showId ->
                     navController.navigate(ShowRoutes.details(showId))
                 }
@@ -95,9 +97,13 @@ fun TvShowApp(modifier: Modifier = Modifier) {
                 ?.getInt(ShowRoutes.SHOW_ID_ARG)
 
             if (showId != null) {
+                val detailsViewModel: TvShowDetailsViewModel = viewModel(
+                    factory = TvShowDetailsViewModelFactory(repository)
+                )
+
                 TvShowDetailsScreen(
                     id = showId,
-                    repository = repository,
+                    viewModel = detailsViewModel,
                     onBackClick = { navController.popBackStack() }
                 )
             }
