@@ -32,13 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import com.example.tvmazeapiapp.data.repository.TvShowRepository
 import com.example.tvmazeapiapp.ui.state.details.TvShowDetailsError
 import com.example.tvmazeapiapp.ui.state.details.TvShowListLoadingDetails
 import com.example.tvmazeapiapp.ui.theme.cardBorder
 import com.example.tvmazeapiapp.viewmodel.TvShowDetailsState
 import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModel
-import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModelFactory
 
 @Composable
 fun LabeledText(label: String, value: String) {
@@ -65,11 +63,8 @@ fun LabeledText(label: String, value: String) {
 @Composable
 fun TvShowDetailsScreen(
     id: Int,
-    repository: TvShowRepository,
-    onBackClick: () -> Unit,
-    viewModel: TvShowDetailsViewModel = viewModel(
-        factory = TvShowDetailsViewModelFactory(repository)
-    )
+    viewModel: TvShowDetailsViewModel,
+    onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -190,7 +185,7 @@ fun TvShowDetailsScreen(
                 TvShowDetailsError(
                     id = id,
                     state = state as TvShowDetailsState.Error,
-                    repository = repository,
+                    onRetry = { viewModel.retry(id) },
                     onBackClick = onBackClick
                 )
             }

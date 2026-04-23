@@ -14,22 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tvmazeapiapp.data.repository.TvShowRepository
 import com.example.tvmazeapiapp.ui.theme.cardBorder
 import com.example.tvmazeapiapp.viewmodel.TvShowDetailsState
-import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModel
-import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModelFactory
 
 @Composable
 fun TvShowDetailsError(
     id: Int,
     state: TvShowDetailsState.Error,
-    repository: TvShowRepository,
-    onBackClick: () -> Unit,
-    viewModel: TvShowDetailsViewModel = viewModel(
-        factory = TvShowDetailsViewModelFactory(repository)
-    )
+    onRetry: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -41,7 +34,7 @@ fun TvShowDetailsError(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Error: ${(state).message}",
+                text = "Error: ${state.message}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error
             )
@@ -52,9 +45,7 @@ fun TvShowDetailsError(
                     contentColor = Color.Black
                 ),
                 border = BorderStroke(1.dp, cardBorder),
-                onClick = {
-                    viewModel.retry(id)
-                }
+                onClick = onRetry
             ) {
                 Text("Retry")
             }
