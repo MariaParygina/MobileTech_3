@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -22,11 +23,13 @@ import com.example.tvmazeapiapp.ui.state.TvShowListState
 import com.example.tvmazeapiapp.ui.widgets.TvShowItem
 import com.example.tvmazeapiapp.viewmodel.TvShowListEvent
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.Color
 import com.example.tvmazeapiapp.ui.state.list.TvShowListEmpty
 import com.example.tvmazeapiapp.ui.state.list.TvShowListError
 import com.example.tvmazeapiapp.ui.state.list.TvShowListLoading
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.Row
+import com.example.tvmazeapiapp.data.model.TvShow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +38,9 @@ fun TvShowListScreen(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onEvent: (TvShowListEvent) -> Unit,
-    onShowClick: (Int) -> Unit
+    onShowClick: (Int) -> Unit,
+    onToggleFavorite: (TvShow) -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     when (state) {
         is TvShowListState.Loading -> {
@@ -50,7 +55,19 @@ fun TvShowListScreen(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(text = "TV Maze Api") }
+                        title = { Text(text = "TV Maze Api") },
+                        actions = {
+                            Button(
+                                onClick = onFavoriteClick,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFA61B06),
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Text("Favorites")
+                            }
+                        }
                     )
                 }
             ) { innerPadding ->
@@ -85,7 +102,8 @@ fun TvShowListScreen(
                             items(state.shows) { show ->
                                 TvShowItem(
                                     show = show,
-                                    onClick = { onShowClick(show.id) }
+                                    onClick = { onShowClick(show.id) },
+                                    onToggleFavorite = onToggleFavorite
                                 )
                             }
 

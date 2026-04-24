@@ -14,7 +14,9 @@ data class TvShow(
     val ended: String?,
     val officialSite: String?,
     val summary: String?,
-    val image: Image?
+    val image: Image?,
+
+    val isFavorite: Boolean = false,
 )
 
 data class Rating(

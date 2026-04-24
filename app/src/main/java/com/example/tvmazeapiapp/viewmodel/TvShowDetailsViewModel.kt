@@ -3,10 +3,12 @@ package com.example.tvmazeapiapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tvmazeapiapp.data.model.TvShow
-import com.example.tvmazeapiapp.data.repository.TvShowRepository
+import com.example.tvmazeapiapp.data.remote.repository.TvShowRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed class TvShowDetailsState {
     object Loading : TvShowDetailsState()
@@ -14,7 +16,8 @@ sealed class TvShowDetailsState {
     data class Error(val message: String) : TvShowDetailsState()
 }
 
-class TvShowDetailsViewModel(
+@HiltViewModel
+class TvShowDetailsViewModel @Inject constructor(
     private val repository: TvShowRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow<TvShowDetailsState>(TvShowDetailsState.Loading)

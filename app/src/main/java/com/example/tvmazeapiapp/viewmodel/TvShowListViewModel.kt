@@ -3,12 +3,14 @@ package com.example.tvmazeapiapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tvmazeapiapp.data.model.TvShow
-import com.example.tvmazeapiapp.data.repository.TvShowRepository
+import com.example.tvmazeapiapp.data.remote.repository.TvShowRepository
 import com.example.tvmazeapiapp.ui.state.TvShowListState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed class TvShowListEvent {
     object LoadShows : TvShowListEvent()
@@ -18,7 +20,8 @@ sealed class TvShowListEvent {
     object LoadMore : TvShowListEvent()
 }
 
-class TvShowListViewModel(
+@HiltViewModel
+class TvShowListViewModel @Inject constructor(
     private val repository: TvShowRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow<TvShowListState>(TvShowListState.Loading)
@@ -29,6 +32,7 @@ class TvShowListViewModel(
     private var currentQuery: String? = null
     private var isLoadingMore = false
     private var isSearching = false
+
 
     fun onEvent(event: TvShowListEvent) {
         when (event) {
@@ -119,5 +123,20 @@ class TvShowListViewModel(
 
     private fun retry() {
         refresh()
+    }
+
+    fun toggleFavorite(show: TvShow) {
+        viewModelScope.launch {
+            val newState = !show.isFavorite
+            repository.setFavorite(show, newState)
+
+            val current = _state.value
+            if (current is TvShowListState.Success) {
+                val updated = current.shows.map {
+                    if (it.id == show.id) it.copy(isFavorite = newState) else it
+                }
+                _state.value = TvShowListState.Success(updated)
+            }
+        }
     }
 }

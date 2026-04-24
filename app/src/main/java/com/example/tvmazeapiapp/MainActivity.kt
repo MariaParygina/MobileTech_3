@@ -15,16 +15,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
-import com.example.tvmazeapiapp.data.api.TvMazeApi
-import com.example.tvmazeapiapp.data.repository.TvShowRepository
-import com.example.tvmazeapiapp.di.NetworkModule
+import com.example.tvmazeapiapp.ui.screens.FavoriteTvShowListScreen
 import com.example.tvmazeapiapp.ui.screens.TvShowListScreen
 import com.example.tvmazeapiapp.ui.theme.TVmazeApiAppTheme
 import com.example.tvmazeapiapp.viewmodel.TvShowListEvent
 import com.example.tvmazeapiapp.viewmodel.TvShowListViewModel
-import com.example.tvmazeapiapp.viewmodel.TvShowListViewModelFactory
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,8 +29,9 @@ import androidx.navigation.navArgument
 import com.example.tvmazeapiapp.di.ShowRoutes
 import com.example.tvmazeapiapp.ui.screens.TvShowDetailsScreen
 import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModel
-import com.example.tvmazeapiapp.viewmodel.TvShowDetailsViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,26 +52,19 @@ class MainActivity : ComponentActivity() {
 fun TvShowApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    val api = NetworkModule.api.create(TvMazeApi::class.java)
-    val repository = TvShowRepository(api)
-
-    val listViewModel: TvShowListViewModel = viewModel(
-        factory = TvShowListViewModelFactory(repository)
-    )
-
-    val state by listViewModel.state.collectAsState()
-
-    var searchQuery by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        listViewModel.onEvent(TvShowListEvent.LoadShows)
-    }
-
     NavHost(
         navController = navController,
         startDestination = ShowRoutes.LIST_ROUTE
     ) {
         composable(ShowRoutes.LIST_ROUTE) {
+            val listViewModel: TvShowListViewModel = hiltViewModel()
+            val state by listViewModel.state.collectAsState()
+            var searchQuery by remember { mutableStateOf("") }
+
+            LaunchedEffect(Unit) {
+                listViewModel.onEvent(TvShowListEvent.LoadShows)
+            }
+
             TvShowListScreen(
                 state = state,
                 searchQuery = searchQuery,
@@ -81,6 +72,25 @@ fun TvShowApp(modifier: Modifier = Modifier) {
                 onEvent = listViewModel::onEvent,
                 onShowClick = { showId ->
                     navController.navigate(ShowRoutes.details(showId))
+                },
+                onFavoriteClick = {
+                    navController.navigate("favorites")
+                },
+                onToggleFavorite = { show ->
+                    listViewModel.toggleFavorite(show)
+                }
+            )
+        }
+
+        composable("favorites") {
+            val listViewModel: TvShowListViewModel = hiltViewModel()
+            FavoriteTvShowListScreen(
+                onBackClick = { navController.popBackStack() },
+                onShowClick = { showId ->
+                    navController.navigate(ShowRoutes.details(showId))
+                },
+                onToggleFavorite = { show ->
+                    listViewModel.toggleFavorite(show)
                 }
             )
         }
@@ -97,9 +107,7 @@ fun TvShowApp(modifier: Modifier = Modifier) {
                 ?.getInt(ShowRoutes.SHOW_ID_ARG)
 
             if (showId != null) {
-                val detailsViewModel: TvShowDetailsViewModel = viewModel(
-                    factory = TvShowDetailsViewModelFactory(repository)
-                )
+                val detailsViewModel: TvShowDetailsViewModel = hiltViewModel()
 
                 TvShowDetailsScreen(
                     id = showId,
