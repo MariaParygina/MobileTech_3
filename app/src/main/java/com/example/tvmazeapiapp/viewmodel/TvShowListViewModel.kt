@@ -6,6 +6,7 @@ import com.example.tvmazeapiapp.data.model.TvShow
 import com.example.tvmazeapiapp.data.remote.repository.TvShowRepository
 import com.example.tvmazeapiapp.ui.state.TvShowListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,7 @@ class TvShowListViewModel @Inject constructor(
     private var currentQuery: String? = null
     private var isLoadingMore = false
     private var isSearching = false
+    private var searchJob: Job? = null
 
 
     fun onEvent(event: TvShowListEvent) {
@@ -113,6 +115,10 @@ class TvShowListViewModel @Inject constructor(
             currentPage = 0
             allShows.clear()
 
+            if (query.isBlank()) {
+                refresh()
+            }
+
             val result = repository.searchShows(query)
 
             if (result.isSuccess) {
@@ -137,10 +143,14 @@ class TvShowListViewModel @Inject constructor(
     }
 
     private fun refresh() {
-        if (currentQuery.isNullOrBlank()) {
-            loadShows()
-        } else {
-            searchShows(currentQuery!!)
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
+            if (currentQuery.isNullOrBlank()) {
+                loadShows()
+            } else {
+                searchShows(currentQuery!!)
+            }
         }
     }
 

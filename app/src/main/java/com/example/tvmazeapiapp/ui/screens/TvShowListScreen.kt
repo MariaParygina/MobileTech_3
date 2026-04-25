@@ -48,7 +48,48 @@ fun TvShowListScreen(
         }
 
         is TvShowListState.Empty -> {
-            TvShowListEmpty()
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(text = "TV Maze Api") },
+                        actions = {
+                            Button(
+                                onClick = onFavoriteClick,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFA61B06),
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Text("Favorites")
+                            }
+                        }
+                    )
+                }
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { query ->
+                            onSearchQueryChange(query)
+                            onEvent(TvShowListEvent.Search(query))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        label = { Text("Search by title") },
+                        singleLine = true,
+                        placeholder = { Text("Enter show name...") },
+                        shape = RoundedCornerShape(16.dp)
+                    )
+
+                    TvShowListEmpty()
+                }
+            }
         }
 
         is TvShowListState.Success -> {

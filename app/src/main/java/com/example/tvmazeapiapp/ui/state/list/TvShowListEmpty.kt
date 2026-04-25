@@ -13,8 +13,7 @@ fun TvShowListEmpty() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-    ) {
-        Text(
+    ) { Text(
             text = "No shows found",
             style = MaterialTheme.typography.bodyLarge
         )
