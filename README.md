@@ -6,8 +6,8 @@
 
 ## Сценарий использования:
 <p> Получает все избранные шоу, этот метод используется на странице Favorites </p>
-@Query("SELECT * FROM favorite_tvshow ORDER BY name")
-suspend fun getFavorites(): List<FavoriteTvShowEntity>
+<p> @Query("SELECT * FROM favorite_tvshow ORDER BY name")
+suspend fun getFavorites(): List<FavoriteTvShowEntity> <\p>
 
 <p> Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows" </p>
 @Query("SELECT id FROM favorite_tvshow")
