@@ -5,23 +5,23 @@
 В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
 
 ## Сценарий использования:
-// Получает все избранные шоу, этот метод используется на странице Favorites
+<p> Получает все избранные шоу, этот метод используется на странице Favorites </p>
 @Query("SELECT * FROM favorite_tvshow ORDER BY name")
 suspend fun getFavorites(): List<FavoriteTvShowEntity>
 
-Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows"
+<p> Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows" </p>
 @Query("SELECT id FROM favorite_tvshow")
 suspend fun getFavoritesIds(): List<Int>
 
-Добавление шоу в список понравившихся
+<p> Добавление шоу в список понравившихся </p>
 @Insert(onConflict = OnConflictStrategy.REPLACE)
 suspend fun upsert(tvshow: FavoriteTvShowEntity)
 
-Удаление шоу из списка (сущности) понравившихся шоу
+<p> Удаление шоу из списка (сущности) понравившихся шоу </p>
 @Query("DELETE FROM favorite_tvshow WHERE id = :id")
 suspend fun deleteById(id: Int)
 
-Функция для кнопки сердечка
+<p> Функция для кнопки сердечка </p>
 fun toggleFavorite(show: TvShow, isFavorite: Boolean) {
     if (isFavorite) {
         dao.upsert(show.toFavoriteEntity())           - добавение в сущность избранных шоу
