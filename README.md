@@ -5,7 +5,7 @@
 В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
 
 ## Сценарий использования:
-<p> Получает все избранные шоу, этот метод используется на странице Favorites </p>
+<h3> Получает все избранные шоу, этот метод используется на странице Favorites </h3>
 @Query("SELECT * FROM favorite_tvshow ORDER BY name")
 
 suspend fun getFavorites(): List<FavoriteTvShowEntity>
