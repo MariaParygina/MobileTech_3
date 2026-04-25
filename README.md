@@ -56,15 +56,19 @@ fun toggleFavorite(show: TvShow, isFavorite: Boolean) {
 
 Экран со списком телешоу (TvShowListScreen):
 
-<img width="424" height="886" alt="image" src="https://github.com/user-attachments/assets/267aa827-0dfb-4a0a-8514-97c8e269c9a2" />
+<img width="408" height="867" alt="image" src="https://github.com/user-attachments/assets/799b4402-4d45-4d0a-bc94-a83d178eb039" />
 
 Шоу подгружаются в количестве 25 шт., кнопка внизу экрана:
 
-<img width="423" height="886" alt="image" src="https://github.com/user-attachments/assets/e439440d-f7d0-4c7f-bdc9-b1d4d676cce6" />
+<img width="413" height="871" alt="image" src="https://github.com/user-attachments/assets/d57048ad-d747-4224-9d71-ed572bc7758a" />
 
 Экран с деталями телешоу при нажатии на карточку (TvShowDetailsScreen):
 
 <img width="425" height="881" alt="image" src="https://github.com/user-attachments/assets/e86df0eb-172f-4804-a446-a79bed664104" />
+
+Экран со всеми понравившимися телешоу:
+
+<img width="404" height="865" alt="image" src="https://github.com/user-attachments/assets/964353cf-83e9-4cb9-bc76-ff6c833ae4de" />
 
 Экран загрузки деталей:
 
