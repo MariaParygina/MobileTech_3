@@ -30,6 +30,7 @@ fun toggleFavorite(show: TvShow, isFavorite: Boolean) {
     }
 }
 
+## Скриншоты
 Экран загрузки приложения:
 
 <img width="423" height="889" alt="image" src="https://github.com/user-attachments/assets/23c30f9a-8c52-43e2-a431-cbca294bf180" />
