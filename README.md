@@ -1,6 +1,34 @@
 Парыгина Мария Алексеевна, Б9124-09.03.03пикд 4
 
 Приложение на основе данных open-API TVmazeAPI, использует список телевизионных шоу.
+В ходе данной работы было реализовано приложение с использованием Hilt и Room. Room я использую для сценария добавления шоу в понравившиеся, которые добавляются во влкадку Favorites по нажатию на кнопку-иконку.
+В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
+
+Сценарий использования:
+Получает все избранные шоу, этот метод используется на странице Favorites
+@Query("SELECT * FROM favorite_tvshow ORDER BY name")
+suspend fun getFavorites(): List<FavoriteTvShowEntity>
+
+Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows"
+@Query("SELECT id FROM favorite_tvshow")
+suspend fun getFavoritesIds(): List<Int>
+
+Добавление шоу в список понравившихся
+@Insert(onConflict = OnConflictStrategy.REPLACE)
+suspend fun upsert(tvshow: FavoriteTvShowEntity)
+
+Удаление шоу из списка (сущности) понравившихся шоу
+@Query("DELETE FROM favorite_tvshow WHERE id = :id")
+suspend fun deleteById(id: Int)
+
+Функция для кнопки сердечка
+fun toggleFavorite(show: TvShow, isFavorite: Boolean) {
+    if (isFavorite) {
+        dao.upsert(show.toFavoriteEntity())           - добавение в сущность избранных шоу
+    } else {
+        dao.deleteById(show.id)                       - удаления шоу из этого списка
+    }
+}
 
 Экран загрузки приложения:
 
