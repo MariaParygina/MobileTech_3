@@ -55,7 +55,15 @@ class TvShowListViewModel @Inject constructor(
             val result = repository.getShows(page = currentPage)
             if (result.isSuccess) {
                 val shows = result.getOrNull() ?: emptyList()
-                val first25 = shows.take(25)
+
+                val favorites = repository.getFavorites()
+                val favoriteIds = favorites.map { it.id }
+
+                val showsWithFavorites = shows.map { show ->
+                    show.copy(isFavorite = favoriteIds.contains(show.id))
+                }
+
+                val first25 = showsWithFavorites.take(25)
                 allShows.addAll(first25)
                 currentPage++
                 _state.value = TvShowListState.Success(allShows.toList())
@@ -76,8 +84,15 @@ class TvShowListViewModel @Inject constructor(
             if (result.isSuccess) {
                 val newShows = result.getOrNull().orEmpty()
 
+                val favorites = repository.getFavorites()
+                val favoriteIds = favorites.map { it.id }
+
+                val showsWithFavorites = newShows.map { show ->
+                    show.copy(isFavorite = favoriteIds.contains(show.id))
+                }
+
                 if (!isSearching) {
-                    val next25 = newShows.take(25)
+                    val next25 = showsWithFavorites.take(25)
                     allShows.addAll(next25)
                     currentPage++
                 } else {
@@ -86,7 +101,7 @@ class TvShowListViewModel @Inject constructor(
 
                 _state.value = TvShowListState.Success(allShows.toList())
             } else {
-                _state.value = TvShowListState.Error("Load more failed")
+                _state.value = TvShowListState.Error("Error loading more")
             }
         }
     }
@@ -102,7 +117,15 @@ class TvShowListViewModel @Inject constructor(
 
             if (result.isSuccess) {
                 val shows = result.getOrNull().orEmpty()
-                _state.value = if (shows.isEmpty()) {
+
+                val favorites = repository.getFavorites()
+                val favoriteIds = favorites.map { it.id }
+
+                val showsWithFavorites = shows.map { show ->
+                    show.copy(isFavorite = favoriteIds.contains(show.id))
+                }
+
+                _state.value = if (showsWithFavorites.isEmpty()) {
                     TvShowListState.Empty
                 } else {
                     TvShowListState.Success(shows)
@@ -129,6 +152,11 @@ class TvShowListViewModel @Inject constructor(
         viewModelScope.launch {
             val newState = !show.isFavorite
             repository.setFavorite(show, newState)
+
+            val index = allShows.indexOfFirst { it.id == show.id }
+            if (index != -1) {
+                allShows[index] = allShows[index].copy(isFavorite = newState)
+            }
 
             val current = _state.value
             if (current is TvShowListState.Success) {

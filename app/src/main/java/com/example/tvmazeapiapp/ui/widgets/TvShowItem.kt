@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import com.example.tvmazeapiapp.R
 import com.example.tvmazeapiapp.data.model.TvShow
 import com.example.tvmazeapiapp.ui.theme.cardBorder
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 
 @Composable
 fun TvShowItem(
@@ -78,11 +81,14 @@ fun TvShowItem(
                 }
             }
 
-            Button(
-                onClick = { onToggleFavorite(show) },
-                modifier = Modifier.size(width = 100.dp, height = 40.dp)
+            IconButton(
+                onClick = { onToggleFavorite(show) }
             ) {
-                Text(if (show.isFavorite) "+" else "-")
+                Icon(
+                    imageVector = if (show.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint = if (show.isFavorite) Color.Red else Color.Gray
+                )
             }
         }
     }

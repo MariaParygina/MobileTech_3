@@ -25,6 +25,12 @@ import com.example.tvmazeapiapp.ui.state.list.TvShowListEmpty
 import com.example.tvmazeapiapp.ui.state.list.TvShowListLoading
 import com.example.tvmazeapiapp.ui.widgets.TvShowItem
 import com.example.tvmazeapiapp.viewmodel.FavoriteViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +51,13 @@ fun FavoriteTvShowListScreen(
             TopAppBar(
                 title = { Text("Favorites") },
                 navigationIcon = {
-                    androidx.compose.material3.IconButton(onClick = onBackClick) {
-                        Text("<-")
+                    IconButton(
+                        onClick = onBackClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
