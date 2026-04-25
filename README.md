@@ -11,25 +11,25 @@
 suspend fun getFavorites(): List<FavoriteTvShowEntity>
 
 
-<h6> Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows" </h6>
+<h4> Получает только id избранных шоу, нужно для помечания понравившихся шоу на главной странице при обновлении экрана и при нажатии на "Load Shows" </h4>
 @Query("SELECT id FROM favorite_tvshow")
 
 suspend fun getFavoritesIds(): List<Int>
 
 
-<h6> Добавление шоу в список понравившихся </h6>
+<h4> Добавление шоу в список понравившихся </h4>
 @Insert(onConflict = OnConflictStrategy.REPLACE)
 
 suspend fun upsert(tvshow: FavoriteTvShowEntity)
 
 
-<h6> Удаление шоу из списка (сущности) понравившихся шоу </h6>
+<h4> Удаление шоу из списка (сущности) понравившихся шоу </h4>
 @Query("DELETE FROM favorite_tvshow WHERE id = :id")
 
 suspend fun deleteById(id: Int)
 
 
-<h6> Функция для кнопки сердечка </h6>
+<h4> Функция для кнопки сердечка </h4>
 fun toggleFavorite(show: TvShow, isFavorite: Boolean) {
 
     if (isFavorite) {
