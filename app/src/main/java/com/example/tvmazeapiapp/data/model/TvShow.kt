@@ -23,6 +23,7 @@ data class Rating(
     val average: Double?
 )
 
+
 data class Network(
     val country: Country?,
     @SerializedName("name")
