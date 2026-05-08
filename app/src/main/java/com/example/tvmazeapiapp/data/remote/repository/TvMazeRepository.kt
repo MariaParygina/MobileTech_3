@@ -15,6 +15,20 @@ class TvShowRepository @Inject constructor(
     private val api: TvMazeApi,
     private val dao: TvShowDao
 ) {
+    constructor(dao: TvShowDao) : this(
+        object : TvMazeApi {
+            override suspend fun getShows(page: Int): List<TvShow> = emptyList()
+            override suspend fun searchShows(query: String): List<TvMazeApi.SearchResult> = emptyList()
+            override suspend fun getShowById(id: Int): TvShow = TvShow(
+                id = id, name = "", network = null, genres = null,
+                rating = null, status = null, premiered = null,
+                ended = null, officialSite = null, summary = null,
+                image = null, isFavorite = false
+            )
+        },
+        dao
+    )
+
     suspend fun getShows(page: Int = 0): Result<List<TvShow>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,5 +75,9 @@ class TvShowRepository @Inject constructor(
         } else {
             dao.deleteById(show.id)
         }
+    }
+
+    suspend fun getFavoritesIds(): List<Int> = withContext(Dispatchers.IO) {
+        dao.getFavoritesIds()
     }
 }
