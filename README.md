@@ -44,18 +44,6 @@
     fun `loadShow returns Error when show is null`
 
 <h3> Интеграционные тесты </h3>
-<h4> FavoriteShowsViewModel: </h4>
-
-// ТЕСТЫ НА UI
-
-// 1 - когда нет любимых шоу, экран сначала загружается, потом показывает пустой список
-    @Test
-    fun `loading changes to empty when no favorites exist`
-
-// 2 - удаление избранного и обновление экрана
-    @Test
-    fun `removeFromFavorites updates state and shows Empty when all removed`
-    
 <h4> RepositoryViewModel: </h4>
 
 // 1 - repository + room: добавление и получение избранного
@@ -65,7 +53,24 @@
 // 2 - удаление из избранного
     @Test
     fun `remove favorite works correctly`
+
+<h3> Интеграционные тесты - UI </h3>
+<h4> DetailsViewModel: </h4>
+
+// 4 - клик по элементу -> loading -> переход на детали
+    @Test
+    fun `click on card loads show details correctly`
     
+<h4> FavoriteShowsViewModel: </h4>
+
+// 1 - когда нет любимых шоу, экран сразу показывает пустой список
+    @Test
+    fun `empty when no favorites exist`
+
+// 2 - удаление избранного и обновление экрана
+    @Test
+    fun `removeFromFavorites updates state and shows Empty when all removed`
+       
 <h3> Тесты на проверку Flow </h3>
 <h4> ListViewModel: </h4>
 
