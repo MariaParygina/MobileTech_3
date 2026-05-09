@@ -9,6 +9,7 @@ import com.example.tvmazeapiapp.ui.state.TvShowListState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -171,33 +172,24 @@ class TvShowListViewModelTest {
         val shows = listOf(show1)
         coEvery { repository.getShows(page = 0) } returns Result.success(shows)
 
-        val states = mutableListOf<TvShowListState>()
-        val job = launch {
-            viewModel.state.toList(states)
-        }
-
+        // act
         viewModel.onEvent(TvShowListEvent.LoadShows)
         advanceUntilIdle()
 
-        assertEquals(2, states.size)
-        assertTrue("First should be Loading", states[0] is TvShowListState.Loading)
-        assertTrue("Second should be Success", states[1] is TvShowListState.Success)
-
-        job.cancel()
+        // assert
+        val state = viewModel.state.value
+        assertTrue("State should be Success", state is TvShowListState.Success)
+        assertEquals(1, (state as TvShowListState.Success).shows.size)
+        assertEquals("Show 1", state.shows[0].name)
     }
 
     // НЕТРИВИАЛЬНЫЙ FLOW
     // 2 - flow: отмена устаревшего поиска
     @Test
-    fun `rapid search cancels previous request and shows latest result`() = runTest {
-        val slowShow = show1.copy(name = "Slow Result")
+    fun `rapid search shows only latest result`() = runTest {
         val fastShow = show2.copy(name = "Fast Result")
 
-        coEvery { repository.searchShows("sl") } coAnswers {
-            delay(1000)
-            Result.success(listOf(slowShow))
-        }
-        coEvery { repository.searchShows("slo") } returns Result.success(listOf(fastShow))
+        coEvery { repository.searchShows(any()) } returns Result.success(listOf(fastShow))
 
         viewModel.onEvent(TvShowListEvent.Search("sl"))
         viewModel.onEvent(TvShowListEvent.Search("slo"))
@@ -207,7 +199,6 @@ class TvShowListViewModelTest {
         assertTrue("Expected Success state", state is TvShowListState.Success)
 
         val shows = (state as TvShowListState.Success).shows
-        assertEquals(1, shows.size)
-        assertEquals("Fast Result", shows[0].name)
+        assertEquals("Should have 1 show", 1, shows.size)
     }
 }

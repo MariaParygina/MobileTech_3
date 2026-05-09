@@ -2,20 +2,23 @@ package com.example.tvmazeapiapp.data.remote.repository
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.tvmazeapiapp.data.TvShowDatabase
-import com.example.tvmazeapiapp.data.local.FavoriteTvShowEntity
-import com.example.tvmazeapiapp.data.local.toFavoriteEntity
+import com.example.tvmazeapiapp.data.api.TvMazeApi
 import com.example.tvmazeapiapp.data.model.Country
 import com.example.tvmazeapiapp.data.model.Network
 import com.example.tvmazeapiapp.data.model.Rating
 import com.example.tvmazeapiapp.data.model.TvShow
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class TvShowRepositoryTest {
     private lateinit var database: TvShowDatabase
@@ -23,12 +26,13 @@ class TvShowRepositoryTest {
 
     private val testShow = TvShow(
         id = 1, name = "Test Show",
-        rating = Rating(average = 8.0),
-        network = Network(country = Country(name = "USA"), holder = "NBC"),
-        genres = listOf("Drama"), status = "Running",
-        premiered = "2023-01-01", ended = null,
-        officialSite = null, summary = "Test summary",
-        image = null, isFavorite = false
+        rating = Rating(average = 8.5),
+        network = Network(country = Country(name = "USA"), holder = "HBO"),
+        genres = listOf("Drama", "Thriller"),
+        status = "Running", premiered = "2023-01-01",
+        ended = null, officialSite = "https://hbo.com/test",
+        summary = "<p>Great show</p>", image = null,
+        isFavorite = false
     )
 
     @Before
@@ -36,8 +40,15 @@ class TvShowRepositoryTest {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             TvShowDatabase::class.java
-        ).build()
-        repository = TvShowRepository(database.tvshowDao())
+        ).allowMainThreadQueries().build()
+
+        val fakeApi = object : TvMazeApi {
+            override suspend fun getShows(page: Int): List<TvShow> = emptyList()
+            override suspend fun searchShows(query: String): List<TvMazeApi.SearchResult> = emptyList()
+            override suspend fun getShowById(id: Int): TvShow = testShow
+        }
+
+        repository = TvShowRepository(fakeApi, database.tvshowDao())
     }
 
     @After
@@ -47,7 +58,7 @@ class TvShowRepositoryTest {
 
     // 1 - repository + room: добавление и получение избранного
     @Test
-    fun `add favorite and retrieve from Room`() = runTest {
+    fun addFavoriteAndRetrieveFromRoom() = runTest {
         repository.setFavorite(testShow, true)
 
         val favorites = repository.getFavorites()
@@ -58,21 +69,17 @@ class TvShowRepositoryTest {
 
     // 2 - удаление из избранного
     @Test
-    fun `remove favorite works correctly`() = runTest {
-        //arrange
+    fun removeFavoriteFromRoom() = runTest {
         repository.setFavorite(testShow, true)
-
-        // act
         repository.setFavorite(testShow, false)
-        // assert
+
         val favorites = repository.getFavorites()
         assertTrue("Favorites should be empty", favorites.isEmpty())
     }
 
-    // НЕТРИВИАЛЬНЫЙ ТЕСТ
-    // нет дублей при повторном добавлении карточки
+    // 3 - отсутствие дублей
     @Test
-    fun `no duplicate favorite creating`() = runTest {
+    fun noDuplicateFavorite() = runTest {
         repository.setFavorite(testShow, true)
         repository.setFavorite(testShow, true)
 
