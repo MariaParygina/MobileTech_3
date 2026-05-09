@@ -5,7 +5,7 @@
 В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
 
 ## Выполненные тесты:
-## Выполнено 8 юнит-тестов (5 + 3), 5 интеграционных тестов (2 + 3 UI), 2 теста на проверку Flow (1 + 1 нетривиальный), 4 нетривиальных теста (2 + 1 + 1)
+## Выполнено 8 юнит-тестов (5 + 3), 6 интеграционных тестов (3 + 3 UI), 2 теста на проверку Flow (1 + 1 нетривиальный), 4 нетривиальных теста (2 + 1 + 1)
 <h3> Юнит-тесты </h3>
 <h4> ListViewModel: </h4>
 
@@ -43,16 +43,20 @@
     @Test
     fun `loadShow returns Error when show is null`
 
-<h3> Интеграционные тесты </h3>
-<h4> RepositoryViewModel: </h4>
+<h3> Интеграционные тесты Repository + Fake API + Room </h3>
+<h4> androidTest: RepositoryViewModel: </h4>
 
 // 1 - repository + room: добавление и получение избранного
     @Test
-    fun `add favorite and retrieve from Room`
+    fun addFavoriteAndRetrieveFromRoom
 
 // 2 - удаление из избранного
     @Test
-    fun `remove favorite works correctly`
+    fun removeFavoriteFromRoom
+
+// 3 - отсутствие дублирующихся шоу в избранном
+    @Test
+    fun noDuplicateFavorite
 
 <h3> Интеграционные тесты - UI </h3>
 <h4> DetailsViewModel: </h4>
@@ -96,12 +100,6 @@
     fun `toggleFavorite updates isFavorite flag in state`
 
 // +"3 - нетривиальный FLOW"
-    
-<h4> RepositoryViewModel: </h4>
-
-// нет дублей при повторном добавлении карточки
-    @Test
-    fun `no duplicate favorite creating`
 
 
 ## Сценарий использования:
