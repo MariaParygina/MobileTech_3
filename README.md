@@ -47,6 +47,7 @@
 <h4> FavoriteShowsViewModel: </h4>
 
 // ТЕСТЫ НА UI
+
 // 1 - когда нет любимых шоу, экран сначала загружается, потом показывает пустой список
     @Test
     fun `loading changes to empty when no favorites exist`
@@ -73,6 +74,7 @@
     fun `stateFlow emits Loading then Success sequence`
 
 // НЕТРИВИАЛЬНЫЙ FLOW
+
 // 2 - flow: отмена устаревшего поиска
     @Test
     fun `rapid search cancels previous request and shows latest result`
