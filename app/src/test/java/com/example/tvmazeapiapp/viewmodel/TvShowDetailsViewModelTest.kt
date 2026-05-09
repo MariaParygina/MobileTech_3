@@ -39,7 +39,7 @@ class TvShowDetailsViewModelTest {
         viewModel = TvShowDetailsViewModel(repository)
     }
 
-    // 2. Успешная загрузка деталей
+    // 1 - успешная загрузка деталей
     @Test
     fun `loadShow success sets Success state`() = runTest {
         coEvery { repository.getShowById(1) } returns testShow
@@ -56,7 +56,7 @@ class TvShowDetailsViewModelTest {
         assertEquals("HBO", show.network?.holder)
     }
 
-    // 3. Ошибка загрузки
+    // 2 - ошибка загрузки
     @Test
     fun `loadShow error sets Error state`() = runTest {
         val errorMessage = "Show not found"
@@ -70,7 +70,7 @@ class TvShowDetailsViewModelTest {
         assertEquals(errorMessage, (state as TvShowDetailsState.Error).message)
     }
 
-    // 5. Загрузка несуществующего шоу
+    // 3 - загрузка несуществующего шоу
     @Test
     fun `loadShow returns Error when show is null`() = runTest {
         coEvery { repository.getShowById(123) } throws NullPointerException("Show not found")
