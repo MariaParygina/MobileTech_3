@@ -5,7 +5,7 @@
 В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
 
 ## Выполненные тесты:
-## Выполнено 8 юнит-тестов,
+## Выполнено 8 юнит-тестов (5 + 3), 4 интеграционных теста (2 + 2), 2 теста на проверку Flow (1 + 1 нетривиальный), 4 нетривиальных теста (2 + 1 + 1)
 <h3> Юнит-тесты </h3>
 <h4> ListViewModel: </h4>
 
@@ -44,6 +44,17 @@
     fun `loadShow returns Error when show is null`
 
 <h3> Интеграционные тесты </h3>
+<h4> FavoriteShowsViewModel: </h4>
+
+// ТЕСТЫ НА UI
+// 1 - когда нет любимых шоу, экран сначала загружается, потом показывает пустой список
+    @Test
+    fun `loading changes to empty when no favorites exist`
+
+// 2 - удаление избранного и обновление экрана
+    @Test
+    fun `removeFromFavorites updates state and shows Empty when all removed`
+    
 <h4> RepositoryViewModel: </h4>
 
 // 1 - repository + room: добавление и получение избранного
