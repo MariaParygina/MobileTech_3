@@ -4,6 +4,82 @@
 В ходе данной работы было реализовано приложение с использованием Hilt и Room. Room я использую для сценария добавления шоу в понравившиеся, которые добавляются во влкадку Favorites по нажатию на кнопку-иконку.
 В Room хранится таблица "favorite_tvshow", которая сохраняет параметры id, name, network, genres, rating (то, что содержится на главной странице для каждого шоу).
 
+## Выполненные тесты:
+## Выполнено 8 юнит-тестов,
+<h4> Юнит-тесты </h4>
+<h3> ListViewModel: </h3>
+ // 1 - начальное состояние
+    @Test
+    fun `initial state is loading`
+
+// 2 - успешная загрузка
+    @Test
+    fun `loadShows success state with shows`
+
+// 3 - ошибка загрузки
+    @Test
+    fun `loadShows error state`
+
+// 4 - поиск с результатами
+    @Test
+    fun `search with results shows success`
+
+// 5 - refresh сбрасывает состояние и перезагружает
+    @Test
+    fun `refresh clears state and reloads shows`
+
+<h3> DetailsViewModel: </h3>
+// 1 - успешная загрузка деталей
+    @Test
+    fun `loadShow success sets Success state`
+
+// 2 - ошибка загрузки
+    @Test
+    fun `loadShow error sets Error state`
+
+// 3 - загрузка несуществующего шоу
+    @Test
+    fun `loadShow returns Error when show is null`
+
+<h4> Интеграционные тесты </h4>
+<h3> RepositoryViewModel: </h3>
+// 1 - repository + room: добавление и получение избранного
+    @Test
+    fun `add favorite and retrieve from Room`
+
+// 2 - удаление из избранного
+    @Test
+    fun `remove favorite works correctly`
+    
+<h4> Тесты на проверку Flow </h4>
+<h3> ListViewModel: </h3>
+// 1 - flow: тестирование потока состояний loading - success
+    @Test
+    fun `stateFlow emits Loading then Success sequence`
+
+// НЕТРИВИАЛЬНЫЙ FLOW
+// 2 - flow: отмена устаревшего поиска
+    @Test
+    fun `rapid search cancels previous request and shows latest result`
+    
+<h4> Нетривиальные тесты </h4>
+<h3> ListViewModel: </h3>
+// 1 - retry после ошибки
+    @Test
+    fun `retry after error call to repository again and recovers`
+
+// 2 - toggleFavorite обновляет состояние
+    @Test
+    fun `toggleFavorite updates isFavorite flag in state`
+
++ 3 - нетривиальный FLOW
+    
+<h3> RepositoryViewModel: </h3>
+// нет дублей при повторном добавлении карточки
+    @Test
+    fun `no duplicate favorite creating`
+
+
 ## Сценарий использования:
 <h4> Получает все избранные шоу, этот метод используется на странице Favorites </h4>
 @Query("SELECT * FROM favorite_tvshow ORDER BY name")
