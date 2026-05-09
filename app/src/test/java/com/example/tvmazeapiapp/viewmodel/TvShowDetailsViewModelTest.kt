@@ -8,7 +8,9 @@ import com.example.tvmazeapiapp.data.model.TvShow
 import com.example.tvmazeapiapp.data.remote.repository.TvShowRepository
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -81,5 +83,29 @@ class TvShowDetailsViewModelTest {
         val state = viewModel.state.value
         assertTrue("Expected Error state", state is TvShowDetailsState.Error)
         assertEquals("Show not found", (state as TvShowDetailsState.Error).message)
+    }
+
+    // UI
+    // 4 - клик по элементу -> loading -> переход на детали
+    @Test
+    fun `click on card loads show details correctly`() = runTest {
+        // arrange
+        val showId = 1
+        coEvery { repository.getShowById(showId) } returns testShow
+
+        // act - симулируем клик по элементу
+        viewModel.loadShow(showId)
+        advanceUntilIdle()
+
+        // assert - проверяем только конечный результат
+        val state = viewModel.state.value
+        assertTrue("State should be Success", state is TvShowDetailsState.Success)
+
+        val show = (state as TvShowDetailsState.Success).show
+        assertEquals("Show ID should match", showId, show.id)
+        assertEquals("Show name should match", "Test Show", show.name)
+        assertEquals("Network should be HBO", "HBO", show.network?.holder)
+
+        coVerify(exactly = 1) { repository.getShowById(showId) }
     }
 }

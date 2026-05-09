@@ -53,9 +53,9 @@ class FavoriteViewModelTest {
     }
 
     // UI тесты
-    // 1 - когда нет любимых шоу, экран сначала загружается, потом показывает пустой список
+    // 1 - когда нет любимых шоу, экран сразу показывает пустой список
     @Test
-    fun `loading changes to empty when no favorites exist`() = runTest {
+    fun `empty when no favorites exist`() = runTest {
         // arrange
         coEvery { repository.getFavorites() } returns emptyList()
 
@@ -69,9 +69,8 @@ class FavoriteViewModelTest {
         advanceUntilIdle()
 
         // assert
-        assertEquals("Should have exactly 2 emissions", 2, states.size)
-        assertTrue("First emission should be Loading", states[0] is TvShowListState.Loading)
-        assertTrue("Second emission should be Empty", states[1] is TvShowListState.Empty)
+        assertEquals("Should have 1 emissions", 1, states.size)
+        assertTrue("First emission should be Empty", states[0] is TvShowListState.Empty)
 
         job.cancel()
     }
