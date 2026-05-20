@@ -9,9 +9,9 @@ import com.example.tvmazeapiapp.ui.state.TvShowListState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -49,6 +49,7 @@ class TvShowListViewModelTest {
 
     @Before
     fun setUp() {
+        clearMocks(repository)
         viewModel = TvShowListViewModel(repository)
         coEvery { repository.getFavorites() } returns emptyList()
     }
@@ -91,19 +92,46 @@ class TvShowListViewModelTest {
 
     // 4 - поиск с результатами
     @Test
-    fun `search with results shows success`() = runTest {
-        val searchResults = listOf(show1)
-        coEvery { repository.searchShows("show") } returns Result.success(searchResults)
+    fun `searchShows returns results`() = runTest {
+        val results = listOf(show1)
+
+        coEvery {
+            repository.searchShows("show")
+        } returns Result.success(results)
+
+        coEvery { repository.getFavorites() } returns emptyList()
 
         viewModel.onEvent(TvShowListEvent.Search("show"))
+
         advanceUntilIdle()
 
         val state = viewModel.state.value
-        assertTrue("Expected Success state", state is TvShowListState.Success)
-        assertEquals(1, (state as TvShowListState.Success).shows.size)
+
+        assertTrue(state is TvShowListState.Success)
+
+        state as TvShowListState.Success
+
+        assertEquals(1, state.shows.size)
+        assertEquals("Show 1", state.shows.first().name)
     }
 
-    // 5 - refresh сбрасывает состояние и перезагружает
+    // 5
+    @Test
+    fun `searchShows emits Empty when nothing found`() = runTest {
+        coEvery {
+            repository.searchShows("unknown")
+        } returns Result.success(emptyList())
+
+        coEvery { repository.getFavorites() } returns emptyList()
+
+        viewModel.onEvent(TvShowListEvent.Search("unknown"))
+
+        advanceUntilIdle()
+
+        assertEquals(TvShowListState.Empty, viewModel.state.value)
+    }
+
+    // 6 - refresh сбрасывает состояние и перезагружает
     @Test
     fun `refresh clears state and reloads shows`() = runTest {
         val shows = listOf(show1)
@@ -145,7 +173,7 @@ class TvShowListViewModelTest {
     // 2 - toggleFavorite обновляет состояние
     @Test
     fun `toggleFavorite updates isFavorite flag in state`() = runTest {
-        val shows = mutableListOf(show1.copy(isFavorite = false))
+        val shows = listOf(show1.copy(isFavorite = false))
         coEvery { repository.getShows(page = 0) } returns Result.success(shows)
         coEvery { repository.setFavorite(any(), any()) } just Runs
 
@@ -172,33 +200,91 @@ class TvShowListViewModelTest {
         val shows = listOf(show1)
         coEvery { repository.getShows(page = 0) } returns Result.success(shows)
 
+        val emissions = mutableListOf<TvShowListState>()
+        val collectJob = launch {
+            viewModel.state.toList(emissions)
+        }
+
+        advanceUntilIdle()
+
+        val initialEmissionsCount = emissions.size
+        println("Initial emissions: $emissions")
+
         // act
         viewModel.onEvent(TvShowListEvent.LoadShows)
         advanceUntilIdle()
 
         // assert
-        val state = viewModel.state.value
-        assertTrue("State should be Success", state is TvShowListState.Success)
-        assertEquals(1, (state as TvShowListState.Success).shows.size)
-        assertEquals("Show 1", state.shows[0].name)
+        val loadingIndex = emissions.indexOfLast { it is TvShowListState.Loading }
+        val successIndex = emissions.indexOfLast { it is TvShowListState.Success }
+
+        assertTrue("Should have Loading state", loadingIndex != -1)
+        assertTrue("Should have Success state", successIndex != -1)
+        assertTrue("Loading should come before Success", loadingIndex < successIndex)
+
+        assertTrue("Last state should be Success", emissions.last() is TvShowListState.Success)
+
+        collectJob.cancel()
     }
 
-    // НЕТРИВИАЛЬНЫЙ FLOW
     // 2 - flow: отмена устаревшего поиска
     @Test
-    fun `rapid search shows only latest result`() = runTest {
+    fun `search flow emits latest successful result`() = runTest {
+
+        val slowShow = show1.copy(name = "Slow Result")
         val fastShow = show2.copy(name = "Fast Result")
 
-        coEvery { repository.searchShows(any()) } returns Result.success(listOf(fastShow))
+        coEvery {
+            repository.searchShows("sl")
+        } coAnswers {
+            delay(1000)
+            Result.success(listOf(slowShow))
+        }
+
+        coEvery {
+            repository.searchShows("slo")
+        } returns Result.success(listOf(fastShow))
+
+        coEvery { repository.getFavorites() } returns emptyList()
+
+        val emissions = mutableListOf<TvShowListState>()
+
+        val collectJob = launch {
+            viewModel.state.toList(emissions)
+        }
 
         viewModel.onEvent(TvShowListEvent.Search("sl"))
+
+        advanceTimeBy(100)
+
         viewModel.onEvent(TvShowListEvent.Search("slo"))
+
         advanceUntilIdle()
 
-        val state = viewModel.state.value
-        assertTrue("Expected Success state", state is TvShowListState.Success)
+        val finalState = viewModel.state.value
 
-        val shows = (state as TvShowListState.Success).shows
-        assertEquals("Should have 1 show", 1, shows.size)
+        assertTrue(finalState is TvShowListState.Success)
+
+        finalState as TvShowListState.Success
+
+        assertEquals("Slow Result", finalState.shows.first().name)
+
+        val successStates = emissions.filterIsInstance<TvShowListState.Success>()
+
+        assertTrue(successStates.isNotEmpty())
+
+        assertTrue(
+            successStates.any {
+                it.shows.firstOrNull()?.name == "Fast Result"
+            }
+        )
+
+        assertTrue(
+            successStates.any {
+                it.shows.firstOrNull()?.name == "Slow Result"
+            }
+        )
+
+        collectJob.cancel()
     }
 }

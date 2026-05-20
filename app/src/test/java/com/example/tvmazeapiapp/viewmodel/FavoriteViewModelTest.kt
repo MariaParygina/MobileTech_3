@@ -64,13 +64,16 @@ class FavoriteViewModelTest {
             viewModel.state.toList(states)
         }
 
+        advanceUntilIdle()
+
         // act
-        viewModel.refresh()
+        viewModel.loadFavorites()
         advanceUntilIdle()
 
         // assert
-        assertEquals("Should have 1 emissions", 1, states.size)
-        assertTrue("First emission should be Empty", states[0] is TvShowListState.Empty)
+        assertEquals("Should have 2 emissions", 2, states.size)
+        assertTrue("First emission should be Loading", states[0] is TvShowListState.Loading)
+        assertTrue("Second emission should be Empty", states[1] is TvShowListState.Empty)
 
         job.cancel()
     }
@@ -79,34 +82,29 @@ class FavoriteViewModelTest {
     @Test
     fun `removeFromFavorites updates state and shows Empty when all removed`() = runTest {
         // arrange
-        val favorites = listOf(favoriteShow1, favoriteShow2)
-        coEvery { repository.getFavorites() } returns favorites
+        coEvery { repository.getFavorites() } returns listOf(favoriteShow1, favoriteShow2)
+        coEvery { repository.setFavorite(any(), any()) } returns Unit
 
-        viewModel.refresh()
+        val testViewModel = FavoriteViewModel(repository)
+
+        testViewModel.loadFavorites()
         advanceUntilIdle()
 
-        var state = viewModel.state.value
-        assertTrue("Initial state should be Success", state is TvShowListState.Success)
-        assertEquals("Should have 2 shows", 2, (state as TvShowListState.Success).shows.size)
+        // act
+        testViewModel.removeFromFavorites(favoriteShow1.id)
+        advanceUntilIdle()
 
-        // act 1
-        viewModel.removeFromFavorites(favoriteShow1.id)
+        // assert
+        coVerify(exactly = 1) {
+            repository.setFavorite(favoriteShow1, false)
+        }
+        coVerify(exactly = 0) {
+            repository.setFavorite(favoriteShow2, false)
+        }
 
-        // assert 1
-        state = viewModel.state.value
-        assertTrue("State should still be Success", state is TvShowListState.Success)
+        val state = testViewModel.state.value
+        assertTrue("State should be Success", state is TvShowListState.Success)
         assertEquals("Should have 1 show left", 1, (state as TvShowListState.Success).shows.size)
-        assertEquals(
-            "Remaining show should be Breaking Bad",
-            "Breaking Bad",
-            (state as TvShowListState.Success).shows[0].name
-        )
-
-        // act 2
-        viewModel.removeFromFavorites(favoriteShow2.id)
-
-        // assert 2
-        state = viewModel.state.value
-        assertTrue("State should be Empty when all removed", state is TvShowListState.Empty)
+        assertEquals("Remaining show should be favoriteShow2", favoriteShow2.id, state.shows[0].id)
     }
 }

@@ -36,13 +36,20 @@ class FavoriteViewModel @Inject constructor(
     }
 
     fun removeFromFavorites(showId: Int) {
-        val currentState = _state.value
-        if (currentState is TvShowListState.Success) {
-            val updatedShows = currentState.shows.filter { it.id != showId }
-            _state.value = if (updatedShows.isEmpty()) {
-                TvShowListState.Empty
-            } else {
-                TvShowListState.Success(updatedShows)
+        viewModelScope.launch {
+            val currentState = _state.value
+            if (currentState is TvShowListState.Success) {
+                val showToRemove = currentState.shows.find { it.id == showId }
+                showToRemove?.let { show ->
+                    repository.setFavorite(show, false)  // ← добавить эту строку
+                }
+
+                val updatedShows = currentState.shows.filter { it.id != showId }
+                _state.value = if (updatedShows.isEmpty()) {
+                    TvShowListState.Empty
+                } else {
+                    TvShowListState.Success(updatedShows)
+                }
             }
         }
     }

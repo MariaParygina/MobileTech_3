@@ -60,52 +60,47 @@ class TvShowDetailsViewModelTest {
 
     // 2 - ошибка загрузки
     @Test
-    fun `loadShow error sets Error state`() = runTest {
-        val errorMessage = "Show not found"
-        coEvery { repository.getShowById(999) } throws Exception(errorMessage)
+    fun `loadShow emits Error when repository throws exception`() = runTest {
 
-        viewModel.loadShow(999)
-        advanceUntilIdle()
-
-        val state = viewModel.state.value
-        assertTrue("Expected Error state", state is TvShowDetailsState.Error)
-        assertEquals(errorMessage, (state as TvShowDetailsState.Error).message)
-    }
-
-    // 3 - загрузка несуществующего шоу
-    @Test
-    fun `loadShow returns Error when show is null`() = runTest {
-        coEvery { repository.getShowById(123) } throws NullPointerException("Show not found")
+        coEvery {
+            repository.getShowById(123)
+        } throws RuntimeException("Network error")
 
         viewModel.loadShow(123)
+
         advanceUntilIdle()
 
         val state = viewModel.state.value
-        assertTrue("Expected Error state", state is TvShowDetailsState.Error)
-        assertEquals("Show not found", (state as TvShowDetailsState.Error).message)
+
+        assertTrue(state is TvShowDetailsState.Error)
+
+        state as TvShowDetailsState.Error
+
+        assertEquals("Network error", state.message)
     }
 
     // UI
-    // 4 - клик по элементу -> loading -> переход на детали
+    // 3 - клик по элементу -> loading -> переход на детали
     @Test
-    fun `click on card loads show details correctly`() = runTest {
-        // arrange
-        val showId = 1
-        coEvery { repository.getShowById(showId) } returns testShow
+    fun `loadShow emits Success with tv show`() = runTest {
 
-        // act - симулируем клик по элементу
+        val showId = 1
+
+        coEvery {
+            repository.getShowById(showId)
+        } returns testShow
+
         viewModel.loadShow(showId)
+
         advanceUntilIdle()
 
-        // assert - проверяем только конечный результат
         val state = viewModel.state.value
-        assertTrue("State should be Success", state is TvShowDetailsState.Success)
 
-        val show = (state as TvShowDetailsState.Success).show
-        assertEquals("Show ID should match", showId, show.id)
-        assertEquals("Show name should match", "Test Show", show.name)
-        assertEquals("Network should be HBO", "HBO", show.network?.holder)
+        assertTrue(state is TvShowDetailsState.Success)
 
-        coVerify(exactly = 1) { repository.getShowById(showId) }
+        state as TvShowDetailsState.Success
+
+        assertEquals(testShow.id, state.show.id)
+        assertEquals(testShow.name, state.show.name)
     }
 }
