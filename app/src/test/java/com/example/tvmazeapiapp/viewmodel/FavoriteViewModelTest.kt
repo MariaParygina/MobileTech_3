@@ -26,15 +26,15 @@ class FavoriteViewModelTest {
     private val repository: TvShowRepository = mockk()
     private lateinit var viewModel: FavoriteViewModel
 
-    private val favoriteShow1 = TvShow(
-        id = 1, name = "Under the Dome",
-        rating = Rating(average = 6.6),
-        network = Network(country = Country(name = "USA"), holder = "CBS"),
-        genres = listOf("Drama", "Sci-Fi", "Mystery"),
-        status = "Ended", premiered = "2013-06-24",
-        ended = "2015-09-10", officialSite = "https://www.cbs.com/shows/under-the-dome/",
-        summary = "<p>Under the Dome is based on the novel by Stephen King.</p>",
-        image = null, isFavorite = true
+    private val testShow = TvShow(
+        id = 1, name = "Test Show",
+        rating = Rating(average = 8.5),
+        network = Network(country = Country(name = "USA"), holder = "HBO"),
+        genres = listOf("Drama", "Thriller"),
+        status = "Running", premiered = "2023-01-01",
+        ended = null, officialSite = "https://hbo.com/test",
+        summary = "<p>Great show</p>", image = null,
+        isFavorite = false
     )
 
     @Before
@@ -81,7 +81,7 @@ class FavoriteViewModelTest {
     @Test
     fun `removeFromFavorites updates state and shows Empty when all removed`() = runTest {
         // arrange
-        coEvery { repository.getFavorites() } returns listOf(favoriteShow1)
+        coEvery { repository.getFavorites() } returns listOf(testShow)
         coEvery { repository.setFavorite(any(), any()) } returns Unit
 
         val testViewModel = FavoriteViewModel(repository)
@@ -90,12 +90,12 @@ class FavoriteViewModelTest {
         advanceUntilIdle()
 
         // act
-        testViewModel.removeFromFavorites(favoriteShow1.id)
+        testViewModel.removeFromFavorites(testShow.id)
         advanceUntilIdle()
 
         // assert
         coVerify(exactly = 1) {
-            repository.setFavorite(favoriteShow1, false)
+            repository.setFavorite(testShow, false)
         }
 
         val state = testViewModel.state.value

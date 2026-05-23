@@ -11,6 +11,9 @@
       <SelectionState runConfigName="TvShowRepositoryTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="TvShowDetailsScreenUiTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

@@ -140,7 +140,10 @@ fun TvShowListScreen(
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(state.shows) { show ->
+                            items(
+                                items = state.shows,
+                                key = { it.id }
+                            ) { show ->
                                 TvShowItem(
                                     show = show,
                                     onClick = { onShowClick(show.id) },

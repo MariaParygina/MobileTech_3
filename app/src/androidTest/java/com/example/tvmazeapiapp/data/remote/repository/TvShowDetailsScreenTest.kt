@@ -20,17 +20,13 @@ class TvShowDetailsScreenUiTest {
     val composeTestRule = createComposeRule()
 
     private val testShow = TvShow(
-        id = 1,
-        name = "Test Show",
+        id = 1, name = "Test Show",
         rating = Rating(average = 8.5),
         network = Network(country = Country(name = "USA"), holder = "HBO"),
-        genres = listOf("Drama"),
-        status = "Running",
-        premiered = "2023-01-01",
-        ended = null,
-        officialSite = "https://hbo.com/test",
-        summary = "<p>Great show</p>",
-        image = null,
+        genres = listOf("Drama", "Thriller"),
+        status = "Running", premiered = "2023-01-01",
+        ended = null, officialSite = "https://hbo.com/test",
+        summary = "<p>Great show</p>", image = null,
         isFavorite = false
     )
 
