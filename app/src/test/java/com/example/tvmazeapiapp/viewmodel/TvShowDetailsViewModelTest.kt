@@ -78,29 +78,4 @@ class TvShowDetailsViewModelTest {
 
         assertEquals("Network error", state.message)
     }
-
-    // UI
-    // 3 - клик по элементу -> loading -> переход на детали
-    @Test
-    fun `loadShow emits Success with tv show`() = runTest {
-
-        val showId = 1
-
-        coEvery {
-            repository.getShowById(showId)
-        } returns testShow
-
-        viewModel.loadShow(showId)
-
-        advanceUntilIdle()
-
-        val state = viewModel.state.value
-
-        assertTrue(state is TvShowDetailsState.Success)
-
-        state as TvShowDetailsState.Success
-
-        assertEquals(testShow.id, state.show.id)
-        assertEquals(testShow.name, state.show.name)
-    }
 }

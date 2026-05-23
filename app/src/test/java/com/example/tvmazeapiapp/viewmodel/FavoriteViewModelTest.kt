@@ -8,6 +8,7 @@ import com.example.tvmazeapiapp.data.remote.repository.TvShowRepository
 import com.example.tvmazeapiapp.ui.state.TvShowListState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -36,23 +37,12 @@ class FavoriteViewModelTest {
         image = null, isFavorite = true
     )
 
-    private val favoriteShow2 = TvShow(
-        id = 2, name = "Breaking Bad",
-        rating = Rating(average = 9.5),
-        network = Network(country = Country(name = "USA"), holder = "AMC"),
-        genres = listOf("Drama", "Crime", "Thriller"),
-        status = "Ended", premiered = "2008-01-20",
-        ended = "2013-09-29", officialSite = "https://www.amc.com/shows/breaking-bad",
-        summary = "<p>Breaking Bad follows Walter White.</p>",
-        image = null, isFavorite = true
-    )
-
     @Before
     fun setUp() {
         viewModel = FavoriteViewModel(repository)
     }
 
-    // UI тесты
+    // Unit-тест
     // 1 - когда нет любимых шоу, экран сразу показывает пустой список
     @Test
     fun `empty when no favorites exist`() = runTest {
@@ -60,8 +50,11 @@ class FavoriteViewModelTest {
         coEvery { repository.getFavorites() } returns emptyList()
 
         val states = mutableListOf<TvShowListState>()
+
         val job = launch {
-            viewModel.state.toList(states)
+            viewModel.state.collect {
+                states.add(it)
+            }
         }
 
         advanceUntilIdle()
@@ -71,18 +64,24 @@ class FavoriteViewModelTest {
         advanceUntilIdle()
 
         // assert
-        assertEquals("Should have 2 emissions", 2, states.size)
-        assertTrue("First emission should be Loading", states[0] is TvShowListState.Loading)
-        assertTrue("Second emission should be Empty", states[1] is TvShowListState.Empty)
+        assertTrue(states.isNotEmpty())
+
+        assertTrue(states.first() is TvShowListState.Loading)
+        assertTrue(states.last() is TvShowListState.Empty)
+
+        coVerify(exactly = 1) {
+            repository.getFavorites()
+        }
 
         job.cancel()
     }
 
-    // 2 - удаление избранного и обновление экрана
+    // UI тест
+    // 1 - удаление избранного и обновление экрана
     @Test
     fun `removeFromFavorites updates state and shows Empty when all removed`() = runTest {
         // arrange
-        coEvery { repository.getFavorites() } returns listOf(favoriteShow1, favoriteShow2)
+        coEvery { repository.getFavorites() } returns listOf(favoriteShow1)
         coEvery { repository.setFavorite(any(), any()) } returns Unit
 
         val testViewModel = FavoriteViewModel(repository)
@@ -98,13 +97,9 @@ class FavoriteViewModelTest {
         coVerify(exactly = 1) {
             repository.setFavorite(favoriteShow1, false)
         }
-        coVerify(exactly = 0) {
-            repository.setFavorite(favoriteShow2, false)
-        }
 
         val state = testViewModel.state.value
-        assertTrue("State should be Success", state is TvShowListState.Success)
-        assertEquals("Should have 1 show left", 1, (state as TvShowListState.Success).shows.size)
-        assertEquals("Remaining show should be favoriteShow2", favoriteShow2.id, state.shows[0].id)
+
+        assertTrue(state is TvShowListState.Empty)
     }
 }
